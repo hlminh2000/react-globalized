@@ -1,9 +1,9 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import withTreePath from './withTreePath'
 
-import { useStateWithId, createStore, StoreProvider } from './hooks'
+import withTreePath from './lib/withTreePath'
+import { useStateWithId, createStore, StoreProvider } from './lib/hooks'
 
 const Counter = withTreePath(({ treePath }) => {
   const [num, setNum] = useStateWithId(treePath, 0)
@@ -32,9 +32,7 @@ const DropDown = withTreePath(({ treePath }) => {
       </button>
       {
         expanded && (
-          <div>
-            <Counter id="counter" />
-          </div>
+          <Counter id="counter" />
         )
       }
     </div>
