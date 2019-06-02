@@ -1,28 +1,28 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import withTreePath from './withTreePath'
 
-import { useStateWithId, createStore, StoreContext } from './hooks'
+import { useStateWithId, createStore, StoreProvider } from './hooks'
 
-const Counter = ({ id }) => {
-  const [num, setNum] = useStateWithId({id: id, initial: 0})
+const Counter = withTreePath(({ id, treePath }) => {
+  const [num, setNum] = useStateWithId(treePath, 0)
   return (
     <>
       <p>
         {num}
       </p>
       <button
-        className="App-link"
         onClick={() => setNum(num+1)}
       >
         Increment
       </button>
     </>
-  ) 
-}
+  )
+})
 
-const DropDown = ({id}) => {
-  const [expanded, setExpanded] = useStateWithId({id, initial: false})
+const DropDown = withTreePath(({ id, treePath }) => {
+  const [expanded, setExpanded] = useStateWithId(treePath, false)
   return (
     <div>
       <button onClick={() => setExpanded(!expanded)}>
@@ -31,28 +31,28 @@ const DropDown = ({id}) => {
       {
         expanded && (
           <div>
-            <Counter id={`${id}/counter`} />
+            <Counter id="counter" />
           </div>
         )
       }
     </div>
   )
-}
+})
 
-const App = () => {
+const App = withTreePath(() => {
   const store = window.store = createStore()
   return (
-    <StoreContext.Provider value={store}>
+    <StoreProvider value={store}>
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <Counter id={"counter1"}/>
-          <Counter id={"counter2"}/>
-          <DropDown id={"myDropDown"}/>
+          <Counter id="counter1"/>
+          <Counter id="counter2"/>
+          <DropDown id="myDropDown"/>
         </header>
       </div>
-    </StoreContext.Provider>
+    </StoreProvider>
   )
-}
+})
 
 export default App;

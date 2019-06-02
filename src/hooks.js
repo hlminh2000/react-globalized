@@ -1,25 +1,47 @@
 import React from 'react';
 
 export const createStore = () => {
-    const states = window.states = {};
-    const actions = window.actions = [];
-    const playbackState = window.playbackState = {
+    const stateHooks = {};
+    const actions = [];
+    const playbackState = {
         playbackTimeout: undefined,
     }
+    const stopPlayback = () => {
+        clearTimeout(playbackState.playbackTimeout)
+        playbackState.playbackTimeout = undefined
+    }
+    const playBack = (actionIndex = 0) => {
+        stopPlayback()
+        const action = actions[actionIndex]
+        const {id, newState} = action
+        stateHooks[id].reactSetState(newState)
+        const nextAction = actions[actionIndex+1]
+        if(nextAction) {
+            playbackState.playbackTimeout = setTimeout(() => {
+                playBack(actionIndex+1)
+            }, nextAction.timeStamp - action.timeStamp + 10)
+        } else {
+            stopPlayback()
+        }
+    }
     return {
-        states,
+        stateHooks,
         actions,
         playbackState,
+        playBack,
+        stopPlayback
     }
 }
 
-export const StoreContext = React.createContext(createStore())
+const StoreContext = React.createContext(createStore())
+
+export const StoreProvider = StoreContext.Provider
 export const useStore = () => React.useContext(StoreContext)
 
-export const useStateWithId = ({initial, id}) => {
+export const useStateWithId = (id, initial) => {
     const store = useStore()
     const {
-        states,
+        stateHooks,
         actions,
         playbackState,
     } = store;
@@ -28,14 +50,19 @@ export const useStateWithId = ({initial, id}) => {
         throw new Error('useStateWithId must be provided a state id ')
     }
     React.useEffect(() => {
-        states[id] = {state, reactSetState}
-        if(playbackState.playbackTimeout === undefined) {
+        const isPlayingback = playbackState.playbackTimeout !== undefined
+        if(stateHooks[id] && !isPlayingback) {
+            throw new Error(`DUPLICATE ID: ${id}`)
+        }
+        stateHooks[id] = {state, reactSetState}
+        if(!isPlayingback) {
             actions.push({
                 id,
                 newState: initial,
                 timeStamp: Date.now()
             })
         }
+        return () => delete stateHooks[id]
     }, [])
     const setState = (newState) => {
         actions.push({
@@ -56,30 +83,3 @@ export const useEffect = (effect, watch) => {
         }
     }, watch)
 }
-
-export const playBack = (store) => (actionIndex = 0) => {
-    const {
-        states,
-        actions,
-        playbackState,
-    } = store;
-    const action = actions[actionIndex]
-    const {id, newState} = action
-    states[id].reactSetState(newState)
-    const nextAction = actions[actionIndex+1]
-    if(nextAction) {
-        playbackState.playbackTimeout = setTimeout(() => {
-            playBack(store)(actionIndex+1)
-        }, nextAction.timeStamp - action.timeStamp + 10)
-    } else {
-        stopPlayback(store)()
-    }
-}
-
-export const stopPlayback = store => () => {
-    const {playbackState} = store
-    clearTimeout(playbackState.playbackTimeout)
-    playbackState.playbackTimeout = undefined
-}
-
-window.playBack = playBack
