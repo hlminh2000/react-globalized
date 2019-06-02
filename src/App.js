@@ -9,7 +9,7 @@ const Counter = withTreePath(({ treePath }) => {
   const [num, setNum] = useStateWithId(treePath, 0)
   const [text, settext] = useStateWithId(`${treePath}_text`, "")
   return (
-    <>
+    <div>
       <p>
         {num}
       </p>
@@ -19,7 +19,7 @@ const Counter = withTreePath(({ treePath }) => {
         Increment
       </button>
       <input value={text} onChange={(e) => settext(e.target.value)} />
-    </>
+    </div>
   )
 })
 
