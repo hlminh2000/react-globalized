@@ -68,13 +68,20 @@ export const useStateWithId = (id, initial) => {
         return () => delete stateHooks[id]
     }, [])
     const setState = (newState) => {
+        reactSetState(newState)
         actions.push({
             id,
             newState,
             timeStamp: Date.now()
         })
-        reactSetState(newState)
-        states.push(Object.entries(stateHooks).map(([key, {state}]) => ({id:key, state})))
+        states.push(
+            Object.entries(stateHooks).map(
+                ([key, {state}]) => ({
+                    id:key, 
+                    state: key === id ? newState : state
+                })
+            )
+        )
     }
     return [state, setState]
 }
