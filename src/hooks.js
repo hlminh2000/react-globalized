@@ -1,6 +1,7 @@
 import React from 'react';
 
 export const createStore = () => {
+    const states = [];
     const stateHooks = {};
     const actions = [];
     const playbackState = {
@@ -25,6 +26,7 @@ export const createStore = () => {
         }
     }
     return {
+        states,
         stateHooks,
         actions,
         playbackState,
@@ -41,6 +43,7 @@ export const useStore = () => React.useContext(StoreContext)
 export const useStateWithId = (id, initial) => {
     const store = useStore()
     const {
+        states,
         stateHooks,
         actions,
         playbackState,
@@ -71,6 +74,7 @@ export const useStateWithId = (id, initial) => {
             timeStamp: Date.now()
         })
         reactSetState(newState)
+        states.push(Object.entries(stateHooks).map(([key, {state}]) => ({id:key, state})))
     }
     return [state, setState]
 }

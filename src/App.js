@@ -5,8 +5,9 @@ import withTreePath from './withTreePath'
 
 import { useStateWithId, createStore, StoreProvider } from './hooks'
 
-const Counter = withTreePath(({ id, treePath }) => {
+const Counter = withTreePath(({ treePath }) => {
   const [num, setNum] = useStateWithId(treePath, 0)
+  const [text, settext] = useStateWithId(`${treePath}_text`, "")
   return (
     <>
       <p>
@@ -17,11 +18,12 @@ const Counter = withTreePath(({ id, treePath }) => {
       >
         Increment
       </button>
+      <input value={text} onChange={(e) => settext(e.target.value)} />
     </>
   )
 })
 
-const DropDown = withTreePath(({ id, treePath }) => {
+const DropDown = withTreePath(({ treePath }) => {
   const [expanded, setExpanded] = useStateWithId(treePath, false)
   return (
     <div>
